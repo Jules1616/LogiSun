@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f08c1e">
+<meta name="application-name" content="LogiSun">
+<meta name="apple-mobile-web-app-title" content="LogiSun">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="apple-touch-icon.png">
+<title>LogiSun</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--tx:#1a2330;--mut:#667281;--bd:#d8dee6;--ac:#f08c1e;--err:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151c;--card:#1a222c;--tx:#eef2f6;--mut:#98a4b1;--bd:#2b3643;--ac:#f5a04a}}
+:root[data-theme="dark"]{--bg:#10151c;--card:#1a222c;--tx:#eef2f6;--mut:#98a4b1;--bd:#2b3643;--ac:#f5a04a}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding-bottom:120px}
+header{position:sticky;top:0;z-index:5;background:var(--ac);color:#fff;padding:14px 16px;font-weight:600}
+main{max-width:560px;margin:auto;padding:12px 16px}
+h2{font-size:20px;margin:8px 0 4px}
+label{display:block;font-size:14px;color:var(--mut);margin:16px 0 6px}
+input,select,textarea{width:100%;font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;min-height:48px}
+textarea{min-height:96px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;min-height:48px;cursor:pointer}
+button.on,button.pri{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+button:disabled{opacity:.45}
+button.big{width:100%;margin-top:10px}
+.nav{position:fixed;left:0;right:0;bottom:0;display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--bd)}
+.nav button{flex:1}
+.hint{font-size:13px;color:var(--mut);margin:6px 0}
+.warn{color:var(--err);font-size:14px}
+.ex{display:flex;gap:8px;margin-top:8px}
+.ex input[data-x="nom"]{flex:1}
+.ex input[data-x="qte"]{width:84px}
+.ex button{color:var(--err);padding:0 14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin:12px 0;line-height:1.5}
+.card p{margin:8px 0}
+.ln{display:flex;align-items:center;gap:6px;margin:6px 0}
+.bu,.sep{color:var(--mut)}
+.ln .q{width:76px;text-align:center;font-weight:600;padding:8px 6px;min-height:44px}
+.ln .nm{flex:1;min-width:0;font-size:15px;padding:8px 10px;min-height:44px}
+.rs{visibility:hidden;min-height:44px;padding:0 10px;color:var(--ac);border-color:transparent;background:transparent}
+.ln.mod .rs{visibility:visible}
+.ln.mod input{border-color:var(--ac)}
+.nts{display:flex;gap:8px;margin:10px 0}
+.nts span{padding-top:12px;color:var(--mut)}
+.nts textarea{min-height:64px}
+#t{position:fixed;left:50%;bottom:96px;transform:translate(-50%,20px);background:#222;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;pointer-events:none;max-width:90%;text-align:center}
+#t.on{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<!-- CONFIGURATION DU PROPRIÉTAIRE : modifie uniquement le texte entre guillemets. Ne supprime ni les virgules, ni les accolades, ni les guillemets. -->
+<script type="application/json" id="cfg">
+{
+  "email": "batiecopaca.jules@gmail.com",
+  "objet": "Liste matériel - dossier : {dossier}",
+  "salutation": "Bonjour,",
+  "signature": "Cordialement",
+  "par_kwc": {"rails": 2, "crochets": 4, "entretoises": 4, "brides": 6, "micro": 1, "connecteur": 1, "mc4": 2, "c230": 1},
+  "bouchons_par_champ": 4,
+  "terminaisons": {"mono": 1, "tri": 3},
+  "autocollants": 1,
+  "coffrets": {
+    "mono": [{"code": "MC-100", "libelle": "monophasé 10 kVA"}, {"code": "MC-100-L", "libelle": "monophasé 3,6 kVA"}],
+    "tri": [{"code": "MC-100-T", "libelle": "triphasé 30 kVA"}]
+  },
+  "libelles": {
+    "rails": "Rails aluminium ESDEC",
+    "crochets": "Crochets de toit ESDEC",
+    "entretoises": "Entretoises caoutchouc ESDEC",
+    "brides": "Brides universelles (étriers de serrage) ESDEC",
+    "coupleurs": "Coupleurs de rails ESDEC",
+    "bouchons": "Bouchons d’extrémité de rail ESDEC",
+    "micro": "Micro-onduleur ATMOS",
+    "connecteur": "Connecteur de guirlande ATMOS",
+    "rall": "Rallonges de guirlande ATMOS",
+    "mc4": "Rallonges MC4",
+    "term": "Bouchon de terminaison guirlande ATMOS",
+    "coffret": "Coffret de protection AC ATMOS",
+    "disj": "Disjoncteur de protection",
+    "c230": "Connecteur 230 pour alimentation micro-onduleur",
+    "stk": "Feuille d’autocollants"
+  }
+}
+</script>
+<header id="h"></header>
+<main id="app"></main>
+<nav class="nav" id="nav"></nav>
+<div id="t"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let CFG=null;
+try{CFG=JSON.parse($('#cfg').textContent)}catch(e){}
+const KEY='liste_materiel_v2';
+const TITRES=['Dossier','Installation','Produits','Notes'];
+const blank=()=>({dossier:'',kwc:'',reseau:'',coffret:'',disj:'',coup:0,rall:0,champs:1,c230:'',c230q:'',extras:[],notes:'',ov:{}});
+let d=blank(),step=0,editing=false,armed=false;
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s){d=Object.assign(blank(),s);if(s.dossier)setTimeout(()=>toast('Brouillon restauré'),400)}}catch(e){}}
+function toast(m){const t=$('#t');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2400)}
+function collect(){
+  document.querySelectorAll('#app [name]').forEach(el=>d[el.name]=el.value);
+  document.querySelectorAll('#app [data-x]').forEach(el=>d.extras[el.dataset.i][el.dataset.x]=el.value);
+  save();
+}
+function pick(k,v){collect();d[k]=v;if(k==='reseau')d.coffret='';save();render()}
+function addx(){collect();d.extras.push({nom:'',qte:1});save();render()}
+function delx(i){collect();d.extras.splice(i,1);save();render()}
+function back(){collect();if(step>0)step--;render(1)}
+function goto(i){collect();step=i;editing=true;render(1)}
+function check(s){
+  if(s===0){
+    if(!d.dossier.trim())return 'Indique le nom du dossier.';
+    if(!/^\d+$/.test(d.kwc.trim())||+d.kwc<1||+d.kwc>99)return 'Puissance : nombre entier de kWc, de 1 à 99.';
+  }
+  if(s===1){
+    if(!d.reseau)return 'Choisis le type de réseau.';
+    if(!d.coffret)return 'Choisis le coffret de protection.';
+    if(!d.disj.trim())return 'Écris le disjoncteur de protection.';
+    if(![d.coup,d.rall,d.champs].every(v=>/^\d+$/.test(String(v).trim())))return 'Coupleurs, rallonges et champs : nombres entiers.';
+    if(+d.champs<1)return 'Il faut au moins 1 champ.';
+    if(!d.c230)return 'Réponds à la question du connecteur 230.';
+  }
+  return '';
+}
+function next(){
+  collect();
+  if(editing){
+    for(let i=0;i<4;i++){const e=check(i);if(e){step=i;editing=false;toast(e);render(1);return}}
+    editing=false;step=4;render(1);return;
+  }
+  const e=check(step);
+  if(e){toast(e);return}
+  step++;render(1);
+}
+function render(top){
+  $('#h').textContent=step<4?`Liste matériel · ${TITRES[step]} (${step+1}/4)`:'Récapitulatif';
+  $('#app').innerHTML=step<4?S[step]():recap();
+  $('#nav').innerHTML=step<4
+    ?`<button onclick="back()"${step?'':' disabled'}>Précédent</button><button class="pri" onclick="next()">${editing?'Valider':'Suivant'}</button>`
+    :`<button onclick="back()">Précédent</button><button onclick="reset()">Nouveau dossier</button>`;
+  if(top)scrollTo(0,0);
+}
+
+const S=[
+()=>`<h2>Dossier</h2>
+<label>Nom du dossier (nom du client)</label>
+<input name="dossier" value="${esc(d.dossier)}" autocomplete="off" placeholder="ex. Dupont Jean">
+<label>Puissance à installer (kWc)</label>
+<input name="kwc" type="number" inputmode="numeric" min="1" max="99" value="${esc(d.kwc)}" placeholder="ex. 6">
+<p class="hint">Nombre entier. Repère de la fiche : 1 kWc = 2 panneaux.</p>`,
+()=>{
+  const o=CFG.coffrets[d.reseau]||[],sug=CFG.par_kwc.c230*(+d.kwc||0);
+  const cp=d.c230==='oui'?`<label>Quantité proposée : ${sug}</label><input type="number" inputmode="numeric" min="0" value="${esc(d.c230q||sug)}" oninput="d.c230q=this.value;save()"><p class="hint">Calculée d’après la puissance. Modifiable.</p>`:'';
+  return `<h2>Installation</h2>
+<label>Type de réseau</label>
+<div class="row"><button class="${d.reseau==='mono'?'on':''}" onclick="pick('reseau','mono')">Monophasé</button><button class="${d.reseau==='tri'?'on':''}" onclick="pick('reseau','tri')">Triphasé</button></div>
+<label>Coffret de protection AC ATMOS</label>
+<select name="coffret"><option value="">${o.length?'— choisir —':'— choisis d’abord le réseau —'}</option>${o.map(x=>`<option value="${esc(x.code)}"${d.coffret===x.code?' selected':''}>${esc(x.code)} · ${esc(x.libelle)}</option>`).join('')}</select>
+<label>Disjoncteur de protection (à écrire)</label>
+<input name="disj" value="${esc(d.disj)}" placeholder="ex. 20 A courbe C">
+<label>Coupleurs de rails ESDEC</label>
+<input name="coup" type="number" inputmode="numeric" min="0" value="${esc(d.coup)}">
+<p class="hint">Selon la longueur des lignes et le raccordement des profilés.</p>
+<label>Rallonges de guirlande ATMOS</label>
+<input name="rall" type="number" inputmode="numeric" min="0" value="${esc(d.rall)}">
+<p class="hint">Saut d’obstacle, changement de pan de toiture, espacement entre rangées.</p>
+<label>Nombre de champs de panneaux</label>
+<input name="champs" type="number" inputmode="numeric" min="1" value="${esc(d.champs)}">
+<p class="hint">Zones de pose séparées. ${CFG.bouchons_par_champ} bouchons d’extrémité par champ.</p>
+<label>Connecteur 230 pour alimentation micro-onduleur ?</label>
+<div class="row"><button class="${d.c230==='oui'?'on':''}" onclick="pick('c230','oui')">Oui</button><button class="${d.c230==='non'?'on':''}" onclick="pick('c230','non')">Non</button></div>
+${cp}`;
+},
+()=>`<h2>Produits supplémentaires</h2>
+<p class="hint">Facultatif : chantier spécial, produit absent de la liste.</p>
+${d.extras.map((x,i)=>`<div class="ex"><input data-x="nom" data-i="${i}" value="${esc(x.nom)}" placeholder="Produit"><input data-x="qte" data-i="${i}" type="number" inputmode="numeric" min="0" value="${esc(x.qte)}"><button onclick="delx(${i})">✕</button></div>`).join('')}
+<button class="big" onclick="addx()">+ Ajouter un produit</button>`,
+()=>`<h2>Notes</h2>
+<label>Notes (apparaissent à la fin de la liste)</label>
+<textarea name="notes" placeholder="Remarques du technicien (facultatif)">${esc(d.notes)}</textarea>`
+];
+
+function rows(){
+  const n=+d.kwc||0,P=CFG.par_kwc,L=CFG.libelles,r=d.reseau,c=(CFG.coffrets[r]||[]).find(x=>x.code===d.coffret);
+  const B=[
+    ['rails',P.rails*n,L.rails],
+    ['crochets',P.crochets*n,L.crochets],
+    ['entretoises',P.entretoises*n,L.entretoises],
+    ['brides',P.brides*n,L.brides],
+    ['coupleurs',+d.coup,L.coupleurs],
+    ['bouchons',CFG.bouchons_par_champ*(+d.champs),L.bouchons],
+    ['micro',P.micro*n,L.micro],
+    ['connecteur',P.connecteur*n,L.connecteur],
+    ['rall',+d.rall,L.rall],
+    ['mc4',P.mc4*n,L.mc4],
+    ['term',CFG.terminaisons[r]??1,L.term],
+    ['coffret',1,`${L.coffret} – ${d.coffret}${c?' ('+c.libelle+')':''}`],
+    ['disj',1,`${L.disj} – ${d.disj.trim()}`]
+  ];
+  if(d.c230==='oui')B.push(['c230',d.c230q||P.c230*n,L.c230]);
+  const R=B.map(([k,q,nm])=>{const o=d.ov[k]||{};return{k,q:o.q??q,n:o.n??nm,mod:k in d.ov}});
+  d.extras.forEach((x,i)=>R.push({k:'x'+i,q:x.qte,n:x.nom,ext:1}));
+  const s=d.ov.stk||{};
+  R.push({k:'stk',q:s.q??CFG.autocollants,n:s.n??L.stk,mod:'stk' in d.ov});
+  return R;
+}
+function mail(){
+  let t=`${CFG.salutation}\n\nVoici la liste du matériel nécessaire pour le dossier ${d.dossier.trim().toUpperCase()}.\nPour une installation de ${d.kwc.trim()} KWC.\n\n`;
+  rows().forEach(x=>{if(String(x.n).trim())t+=`● ${String(x.q).trim()||0} : ${String(x.n).trim()}\n`});
+  if(d.notes.trim())t+=`\nNotes : ${d.notes.trim()}\n`;
+  return t+`\n${CFG.signature}`;
+}
+function subj(){return CFG.objet.replace('{dossier}',d.dossier.trim().toUpperCase())}
+function recap(){
+  const ok=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(CFG.email||'');
+  return `<h2>Récapitulatif</h2>
+<p class="hint">Corrige directement la liste. Une valeur modifiée passe en orange : le ↺ la rétablit au calcul d’origine.</p>
+<div class="row">${TITRES.map((t,i)=>`<button onclick="goto(${i})">${t}</button>`).join('')}</div>
+<div class="card">
+<p>${esc(CFG.salutation)}</p>
+<p>Voici la liste du matériel nécessaire pour le dossier <b>${esc(d.dossier.trim().toUpperCase())}</b>.<br>Pour une installation de ${esc(d.kwc.trim())} KWC.</p>
+${rows().map(r=>`<div class="ln${r.mod?' mod':''}"><span class="bu">●</span><input class="q" type="number" inputmode="numeric" min="0" value="${esc(r.q)}" oninput="ed('${r.k}','q',this.value,this)"><span class="sep">:</span><input class="nm" value="${esc(r.n)}" oninput="ed('${r.k}','n',this.value,this)">${r.ext?'':`<button class="rs" onclick="rst('${r.k}')">↺</button>`}</div>`).join('')}
+<div class="nts"><span>Notes :</span><textarea oninput="d.notes=this.value;save()" placeholder="facultatif">${esc(d.notes)}</textarea></div>
+<p>${esc(CFG.signature)}</p>
+</div>
+<button class="pri big" onclick="send()"${ok?'':' disabled'}>📧 Envoyer par mail</button>
+<button class="big" onclick="copy()">📋 Copier le texte</button>
+${ok?'':'<p class="warn">Adresse de réception non configurée : renseigne « email » dans le bloc de configuration.</p>'}`;
+}
+function ed(k,f,v,el){
+  if(k[0]==='x'){const x=d.extras[+k.slice(1)];x[f==='q'?'qte':'nom']=v}
+  else{const o=d.ov[k]||{};o[f]=v;d.ov[k]=o}
+  el.closest('.ln').classList.add('mod');save();
+}
+function rst(k){delete d.ov[k];save();render()}
+function send(){location.href='mailto:'+CFG.email+'?subject='+encodeURIComponent(subj())+'&body='+encodeURIComponent(mail())}
+async function copy(){
+  const t=mail();
+  try{await navigator.clipboard.writeText(t);toast('Texte copié ✔')}
+  catch(e){
+    const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();
+    let ok=false;try{ok=document.execCommand('copy')}catch(_){}
+    a.remove();toast(ok?'Texte copié ✔':'Copie impossible : sélectionne le texte à la main');
+  }
+}
+function reset(){
+  if(!armed){armed=true;toast('Touche à nouveau pour effacer le dossier');setTimeout(()=>armed=false,3000);return}
+  d=blank();step=0;editing=false;armed=false;save();render(1);
+}
+
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if(CFG){load();render(1)}
+else{$('#h').textContent='Configuration';$('#app').innerHTML='<h2>Configuration à corriger</h2><p class="warn">Le bloc de configuration contient une erreur de syntaxe : vérifie les guillemets, les virgules et les accolades.</p>'}
+</script>
+</body>
+</html>
