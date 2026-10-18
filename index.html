@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f08c1e">
-<title>Liste matériel</title>
+<meta name="application-name" content="LogiSun">
+<meta name="apple-mobile-web-app-title" content="LogiSun">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="apple-touch-icon.png">
+<title>LogiSun</title>
 <style>
 :root{--bg:#f3f5f8;--card:#fff;--tx:#1a2330;--mut:#667281;--bd:#d8dee6;--ac:#f08c1e;--err:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151c;--card:#1a222c;--tx:#eef2f6;--mut:#98a4b1;--bd:#2b3643;--ac:#f5a04a}}
@@ -251,6 +256,7 @@ function reset(){
   d=blank();step=0;editing=false;armed=false;save();render(1);
 }
 
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 if(CFG){load();render(1)}
 else{$('#h').textContent='Configuration';$('#app').innerHTML='<h2>Configuration à corriger</h2><p class="warn">Le bloc de configuration contient une erreur de syntaxe : vérifie les guillemets, les virgules et les accolades.</p>'}
 </script>
