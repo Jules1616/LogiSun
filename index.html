@@ -62,9 +62,9 @@ button.big{width:100%;margin-top:10px}
   "salutation": "Bonjour,",
   "signature": "Cordialement",
   "par_kwc": {"rails": 2, "crochets": 4, "entretoises": 4, "brides": 6, "micro": 1, "connecteur": 1, "mc4": 2, "c230": 1},
-  "bouchons_par_champ": 4,
   "terminaisons": {"mono": 1, "tri": 3},
   "autocollants": 1,
+  "disjoncteurs": ["16 A mono", "20 A mono", "32 A mono", "40 A mono", "63 A mono", "63 A triphasé"],
   "coffrets": {
     "mono": [{"code": "MC-100", "libelle": "monophasé 10 kVA"}, {"code": "MC-100-L", "libelle": "monophasé 3,6 kVA"}],
     "tri": [{"code": "MC-100-T", "libelle": "triphasé 30 kVA"}]
@@ -99,7 +99,7 @@ let CFG=null;
 try{CFG=JSON.parse($('#cfg').textContent)}catch(e){}
 const KEY='liste_materiel_v2';
 const TITRES=['Dossier','Installation','Produits','Notes'];
-const blank=()=>({dossier:'',kwc:'',reseau:'',coffret:'',disj:'',coup:0,rall:0,champs:1,c230:'',c230q:'',extras:[],notes:'',ov:{}});
+const blank=()=>({dossier:'',kwc:'',reseau:'',coffret:'',disj:'',coup:0,rall:0,bouchons:'',c230:'',c230q:'',extras:[],notes:'',ov:{}});
 let d=blank(),step=0,editing=false,armed=false;
 
 function save(){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
@@ -123,9 +123,9 @@ function check(s){
   if(s===1){
     if(!d.reseau)return 'Choisis le type de réseau.';
     if(!d.coffret)return 'Choisis le coffret de protection.';
-    if(!d.disj.trim())return 'Écris le disjoncteur de protection.';
-    if(![d.coup,d.rall,d.champs].every(v=>/^\d+$/.test(String(v).trim())))return 'Coupleurs, rallonges et champs : nombres entiers.';
-    if(+d.champs<1)return 'Il faut au moins 1 champ.';
+    if(!d.disj)return 'Choisis le disjoncteur de protection.';
+    if(![d.coup,d.rall,d.bouchons].every(v=>/^\d+$/.test(String(v).trim())))return 'Coupleurs, rallonges et bouchons : nombres entiers.';
+    if(+d.bouchons<1)return 'Indique le nombre de bouchons d’extrémité (au moins 1).';
     if(!d.c230)return 'Réponds à la question du connecteur 230.';
   }
   return '';
@@ -141,7 +141,7 @@ function next(){
   step++;render(1);
 }
 function render(top){
-  $('#h').textContent=step<4?`Liste matériel · ${TITRES[step]} (${step+1}/4)`:'Récapitulatif';
+  $('#h').textContent=step<4?`LogiSun · ${TITRES[step]} (${step+1}/4)`:'Récapitulatif';
   $('#app').innerHTML=step<4?S[step]():recap();
   $('#nav').innerHTML=step<4
     ?`<button onclick="back()"${step?'':' disabled'}>Précédent</button><button class="pri" onclick="next()">${editing?'Valider':'Suivant'}</button>`
@@ -164,17 +164,17 @@ const S=[
 <div class="row"><button class="${d.reseau==='mono'?'on':''}" onclick="pick('reseau','mono')">Monophasé</button><button class="${d.reseau==='tri'?'on':''}" onclick="pick('reseau','tri')">Triphasé</button></div>
 <label>Coffret de protection AC ATMOS</label>
 <select name="coffret"><option value="">${o.length?'— choisir —':'— choisis d’abord le réseau —'}</option>${o.map(x=>`<option value="${esc(x.code)}"${d.coffret===x.code?' selected':''}>${esc(x.code)} · ${esc(x.libelle)}</option>`).join('')}</select>
-<label>Disjoncteur de protection (à écrire)</label>
-<input name="disj" value="${esc(d.disj)}" placeholder="ex. 20 A courbe C">
+<label>Disjoncteur de protection</label>
+<select name="disj"><option value="">— choisir —</option>${(CFG.disjoncteurs||[]).map(x=>`<option value="${esc(x)}"${d.disj===x?' selected':''}>${esc(x)}</option>`).join('')}</select>
 <label>Coupleurs de rails ESDEC</label>
 <input name="coup" type="number" inputmode="numeric" min="0" value="${esc(d.coup)}">
 <p class="hint">Selon la longueur des lignes et le raccordement des profilés.</p>
 <label>Rallonges de guirlande ATMOS</label>
 <input name="rall" type="number" inputmode="numeric" min="0" value="${esc(d.rall)}">
 <p class="hint">Saut d’obstacle, changement de pan de toiture, espacement entre rangées.</p>
-<label>Nombre de champs de panneaux</label>
-<input name="champs" type="number" inputmode="numeric" min="1" value="${esc(d.champs)}">
-<p class="hint">Zones de pose séparées. ${CFG.bouchons_par_champ} bouchons d’extrémité par champ.</p>
+<label>Bouchons d’extrémité de rail ESDEC</label>
+<input name="bouchons" type="number" inputmode="numeric" min="0" value="${esc(d.bouchons)}">
+<p class="hint">Quantité totale à poser sur le chantier.</p>
 <label>Connecteur 230 pour alimentation micro-onduleur ?</label>
 <div class="row"><button class="${d.c230==='oui'?'on':''}" onclick="pick('c230','oui')">Oui</button><button class="${d.c230==='non'?'on':''}" onclick="pick('c230','non')">Non</button></div>
 ${cp}`;
@@ -196,7 +196,7 @@ function rows(){
     ['entretoises',P.entretoises*n,L.entretoises],
     ['brides',P.brides*n,L.brides],
     ['coupleurs',+d.coup,L.coupleurs],
-    ['bouchons',CFG.bouchons_par_champ*(+d.champs),L.bouchons],
+    ['bouchons',+d.bouchons,L.bouchons],
     ['micro',P.micro*n,L.micro],
     ['connecteur',P.connecteur*n,L.connecteur],
     ['rall',+d.rall,L.rall],
