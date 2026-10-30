@@ -332,8 +332,8 @@ ${rows().map(r=>`<div class="ln${r.mod?' mod':''}"><span class="bu">●</span><i
 <div class="nts"><span>Notes :</span><textarea oninput="d.notes=this.value;save()" placeholder="facultatif">${esc(d.notes)}</textarea></div>
 <p>${esc(CFG.signature)}</p>
 </div>
-<button class="pri big" onclick="send(0)"${okM?'':' disabled'}>📧 Envoyer à moi uniquement</button>
-<button class="big" onclick="send(1)"${okF?'':' disabled'}>📧 Envoyer à moi et à ${esc(CFG.fournisseur.nom)}</button>
+<button class="pri big" onclick="send(0)"${okM?'':' disabled'}>📧 Envoyer à Jules uniquement</button>
+<button class="big" onclick="send(1)"${okF?'':' disabled'}>📧 Envoyer à Jules et à ${esc(CFG.fournisseur.nom)}</button>
 <button class="big" onclick="copy()">📋 Copier le texte</button>
 ${okM?'':'<p class="warn">Adresse de réception non configurée : renseigne « email » dans le bloc de configuration.</p>'}`;
 }
