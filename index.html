@@ -49,6 +49,9 @@ button.big{width:100%;margin-top:10px}
 .nts{display:flex;gap:8px;margin:10px 0}
 .nts span{padding-top:12px;color:var(--mut)}
 .nts textarea{min-height:64px}
+.card{background:#fff;color:#000}
+.card input,.card textarea{background:#fff;color:#000;border-color:#c5ccd6}
+.card .bu,.card .sep,.card .nts span{color:#000}
 #t{position:fixed;left:50%;bottom:96px;transform:translate(-50%,20px);background:#222;color:#fff;padding:10px 16px;border-radius:10px;opacity:0;transition:.25s;pointer-events:none;max-width:90%;text-align:center}
 #t.on{opacity:1;transform:translate(-50%,0)}
 </style>
@@ -58,24 +61,46 @@ button.big{width:100%;margin-top:10px}
 <script type="application/json" id="cfg">
 {
   "email": "batiecopaca.jules@gmail.com",
-  "objet": "Liste matériel - dossier : {dossier}",
   "salutation": "Bonjour,",
   "signature": "Cordialement",
-  "par_kwc": {"rails": 2, "crochets": 4, "entretoises": 4, "brides": 6, "micro": 1, "connecteur": 1, "mc4": 2, "c230": 1},
-  "terminaisons": {"mono": 1, "tri": 3},
+  "par_kwc": {
+    "micro": 1,
+    "connecteur": 1,
+    "mc4": 2,
+    "c230": 1
+  },
+  "terminaisons": {
+    "mono": 1,
+    "tri": 3
+  },
   "autocollants": 1,
-  "disjoncteurs": ["16 A mono", "20 A mono", "32 A mono", "40 A mono", "63 A mono", "63 A triphasé"],
+  "disjoncteurs": [
+    "16 A mono",
+    "20 A mono",
+    "32 A mono",
+    "40 A mono",
+    "63 A mono",
+    "63 A triphasé"
+  ],
   "coffrets": {
-    "mono": [{"code": "MC-100", "libelle": "monophasé 10 kVA"}, {"code": "MC-100-L", "libelle": "monophasé 3,6 kVA"}],
-    "tri": [{"code": "MC-100-T", "libelle": "triphasé 30 kVA"}]
+    "mono": [
+      {
+        "code": "MC-100",
+        "libelle": "monophasé 10 kVA"
+      },
+      {
+        "code": "MC-100-L",
+        "libelle": "monophasé 3,6 kVA"
+      }
+    ],
+    "tri": [
+      {
+        "code": "MC-100-T",
+        "libelle": "triphasé 30 kVA"
+      }
+    ]
   },
   "libelles": {
-    "rails": "Rails aluminium ESDEC",
-    "crochets": "Crochets de toit ESDEC",
-    "entretoises": "Entretoises caoutchouc ESDEC",
-    "brides": "Brides universelles (étriers de serrage) ESDEC",
-    "coupleurs": "Coupleurs de rails ESDEC",
-    "bouchons": "Bouchons d’extrémité de rail ESDEC",
     "micro": "Micro-onduleur ATMOS",
     "connecteur": "Connecteur de guirlande ATMOS",
     "rall": "Rallonges de guirlande ATMOS",
@@ -85,7 +110,80 @@ button.big{width:100%;margin-top:10px}
     "disj": "Disjoncteur de protection",
     "c230": "Connecteur 230 pour alimentation micro-onduleur",
     "stk": "Feuille d’autocollants"
-  }
+  },
+  "structures": {
+    "esdec": {
+      "nom": "ESDEC (crochets)",
+      "objet": "Liste matériel - dossier : {dossier}",
+      "pose": [
+        [
+          "rails",
+          2,
+          "Rails aluminium ESDEC"
+        ],
+        [
+          "crochets",
+          4,
+          "Crochets de toit ESDEC"
+        ],
+        [
+          "entretoises",
+          4,
+          "Entretoises caoutchouc ESDEC"
+        ],
+        [
+          "brides",
+          6,
+          "Brides universelles (étriers de serrage) ESDEC"
+        ]
+      ],
+      "coupleurs": "Coupleurs de rails ESDEC",
+      "bouchons": "Bouchons d’extrémité de rail ESDEC"
+    },
+    "isy": {
+      "nom": "ISY-PV (tire-fond)",
+      "objet": "Matériel pour le dossier {dossier}",
+      "pose": [
+        [
+          "rails",
+          2,
+          "Rails ISY-PV"
+        ],
+        [
+          "tirefond",
+          4,
+          "Tire-fond ISY-PV"
+        ],
+        [
+          "brides_ext",
+          4,
+          "Brides extérieures ISY-PV"
+        ],
+        [
+          "brides_int",
+          2,
+          "Brides intérieures ISY-PV"
+        ],
+        [
+          "ecrou",
+          1,
+          "Écrous de fixation micro-onduleur ISY-PV"
+        ]
+      ],
+      "coupleurs": "Coupleurs de rails ISY-PV",
+      "bouchons": "Bouchons de fin de rail ISY-PV"
+    }
+  },
+  "fournisseur": {
+    "nom": "Patrick (Mavisun)",
+    "email": "patrick.moli@mavisun.com"
+  },
+  "consuel": [
+    "Cas consuel 1",
+    "Cas consuel 2",
+    "Cas consuel 3"
+  ],
+  "tableau_specifique": "Tableau spécifique"
 }
 </script>
 <header id="h"></header>
@@ -99,7 +197,10 @@ let CFG=null;
 try{CFG=JSON.parse($('#cfg').textContent)}catch(e){}
 const KEY='liste_materiel_v2';
 const TITRES=['Dossier','Installation','Produits','Notes'];
-const blank=()=>({dossier:'',kwc:'',reseau:'',coffret:'',disj:'',coup:0,rall:0,bouchons:'',c230:'',c230q:'',extras:[],notes:'',ov:{}});
+const blank=()=>({structure:'',dossier:'',kwc:'',consuel:'',reseau:'',coffret:'',coffspec:'',disj:'',coup:0,rall:0,bouchons:'',c230:'',c230q:'',extras:[],notes:'',ov:{}});
+const ST=()=>CFG.structures[d.structure]||CFG.structures[Object.keys(CFG.structures)[0]];
+const valid=e=>/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e||'');
+function bold(s){return [...s].map(c=>{const k=c.codePointAt(0);return k>=65&&k<=90?String.fromCodePoint(0x1D400+k-65):k>=97&&k<=122?String.fromCodePoint(0x1D41A+k-97):k>=48&&k<=57?String.fromCodePoint(0x1D7CE+k-48):c}).join('')}
 let d=blank(),step=0,editing=false,armed=false;
 
 function save(){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
@@ -117,12 +218,15 @@ function back(){collect();if(step>0)step--;render(1)}
 function goto(i){collect();step=i;editing=true;render(1)}
 function check(s){
   if(s===0){
+    if(!d.structure)return 'Choisis le type de pose.';
     if(!d.dossier.trim())return 'Indique le nom du dossier.';
     if(!/^\d+$/.test(d.kwc.trim())||+d.kwc<1||+d.kwc>99)return 'Puissance : nombre entier de kWc, de 1 à 99.';
   }
   if(s===1){
+    if(!d.consuel)return 'Choisis le cas consuel.';
     if(!d.reseau)return 'Choisis le type de réseau.';
-    if(!d.coffret)return 'Choisis le coffret de protection.';
+    if(!d.coffret)return 'Choisis le tableau électrique.';
+    if(d.coffret==='SPEC'&&!d.coffspec.trim())return 'Écris les composants du tableau spécifique.';
     if(!d.disj)return 'Choisis le disjoncteur de protection.';
     if(![d.coup,d.rall,d.bouchons].every(v=>/^\d+$/.test(String(v).trim())))return 'Coupleurs, rallonges et bouchons : nombres entiers.';
     if(+d.bouchons<1)return 'Indique le nombre de bouchons d’extrémité (au moins 1).';
@@ -151,28 +255,34 @@ function render(top){
 
 const S=[
 ()=>`<h2>Dossier</h2>
+<label>Type de pose</label>
+<div class="row">${Object.entries(CFG.structures).map(([k,v])=>`<button class="${d.structure===k?'on':''}" onclick="pick('structure','${k}')">${esc(v.nom)}</button>`).join('')}</div>
 <label>Nom du dossier (nom du client)</label>
 <input name="dossier" value="${esc(d.dossier)}" autocomplete="off" placeholder="ex. Dupont Jean">
 <label>Puissance à installer (kWc)</label>
 <input name="kwc" type="number" inputmode="numeric" min="1" max="99" value="${esc(d.kwc)}" placeholder="ex. 6">
 <p class="hint">Nombre entier. Repère de la fiche : 1 kWc = 2 panneaux.</p>`,
 ()=>{
-  const o=CFG.coffrets[d.reseau]||[],sug=CFG.par_kwc.c230*(+d.kwc||0);
+  const o=CFG.coffrets[d.reseau]||[],sug=CFG.par_kwc.c230*(+d.kwc||0),SS=ST();
   const cp=d.c230==='oui'?`<label>Quantité proposée : ${sug}</label><input type="number" inputmode="numeric" min="0" value="${esc(d.c230q||sug)}" oninput="d.c230q=this.value;save()"><p class="hint">Calculée d’après la puissance. Modifiable.</p>`:'';
+  const sp=d.coffret==='SPEC'?`<label>Composants du tableau spécifique</label><textarea name="coffspec" placeholder="ex. disjoncteur différentiel, parafoudre">${esc(d.coffspec)}</textarea>`:'';
   return `<h2>Installation</h2>
+<label>Cas consuel</label>
+<div class="row">${CFG.consuel.map(x=>`<button class="${d.consuel===x?'on':''}" onclick="pick('consuel','${x}')">${esc(x)}</button>`).join('')}</div>
 <label>Type de réseau</label>
 <div class="row"><button class="${d.reseau==='mono'?'on':''}" onclick="pick('reseau','mono')">Monophasé</button><button class="${d.reseau==='tri'?'on':''}" onclick="pick('reseau','tri')">Triphasé</button></div>
-<label>Coffret de protection AC ATMOS</label>
-<select name="coffret"><option value="">${o.length?'— choisir —':'— choisis d’abord le réseau —'}</option>${o.map(x=>`<option value="${esc(x.code)}"${d.coffret===x.code?' selected':''}>${esc(x.code)} · ${esc(x.libelle)}</option>`).join('')}</select>
+<label>Tableau électrique</label>
+<select name="coffret" onchange="collect();render()"><option value="">${d.reseau?'— choisir —':'— choisis d’abord le réseau —'}</option>${o.map(x=>`<option value="${esc(x.code)}"${d.coffret===x.code?' selected':''}>${esc(x.code)} · ${esc(x.libelle)}</option>`).join('')}${d.reseau?`<option value="SPEC"${d.coffret==='SPEC'?' selected':''}>${esc(CFG.tableau_specifique)}</option>`:''}</select>
+${sp}
 <label>Disjoncteur de protection</label>
 <select name="disj"><option value="">— choisir —</option>${(CFG.disjoncteurs||[]).map(x=>`<option value="${esc(x)}"${d.disj===x?' selected':''}>${esc(x)}</option>`).join('')}</select>
-<label>Coupleurs de rails ESDEC</label>
+<label>${esc(SS.coupleurs)}</label>
 <input name="coup" type="number" inputmode="numeric" min="0" value="${esc(d.coup)}">
 <p class="hint">Selon la longueur des lignes et le raccordement des profilés.</p>
 <label>Rallonges de guirlande ATMOS</label>
 <input name="rall" type="number" inputmode="numeric" min="0" value="${esc(d.rall)}">
 <p class="hint">Saut d’obstacle, changement de pan de toiture, espacement entre rangées.</p>
-<label>Bouchons d’extrémité de rail ESDEC</label>
+<label>${esc(SS.bouchons)}</label>
 <input name="bouchons" type="number" inputmode="numeric" min="0" value="${esc(d.bouchons)}">
 <p class="hint">Quantité totale à poser sur le chantier.</p>
 <label>Connecteur 230 pour alimentation micro-onduleur ?</label>
@@ -189,22 +299,12 @@ ${d.extras.map((x,i)=>`<div class="ex"><input data-x="nom" data-i="${i}" value="
 ];
 
 function rows(){
-  const n=+d.kwc||0,P=CFG.par_kwc,L=CFG.libelles,r=d.reseau,c=(CFG.coffrets[r]||[]).find(x=>x.code===d.coffret);
-  const B=[
-    ['rails',P.rails*n,L.rails],
-    ['crochets',P.crochets*n,L.crochets],
-    ['entretoises',P.entretoises*n,L.entretoises],
-    ['brides',P.brides*n,L.brides],
-    ['coupleurs',+d.coup,L.coupleurs],
-    ['bouchons',+d.bouchons,L.bouchons],
-    ['micro',P.micro*n,L.micro],
-    ['connecteur',P.connecteur*n,L.connecteur],
-    ['rall',+d.rall,L.rall],
-    ['mc4',P.mc4*n,L.mc4],
-    ['term',CFG.terminaisons[r]??1,L.term],
-    ['coffret',1,`${L.coffret} – ${d.coffret}${c?' ('+c.libelle+')':''}`],
-    ['disj',1,`${L.disj} – ${d.disj.trim()}`]
-  ];
+  const n=+d.kwc||0,P=CFG.par_kwc,L=CFG.libelles,SS=ST(),r=d.reseau;
+  const c=(CFG.coffrets[r]||[]).find(x=>x.code===d.coffret);
+  const B=SS.pose.map(([k,m,nm])=>[k,m*n,nm]);
+  B.push(['coupleurs',+d.coup,SS.coupleurs],['bouchons',+d.bouchons,SS.bouchons],['micro',P.micro*n,L.micro],['connecteur',P.connecteur*n,L.connecteur],['rall',+d.rall,L.rall],['mc4',P.mc4*n,L.mc4],['term',CFG.terminaisons[r]??1,L.term]);
+  const cf=d.coffret==='SPEC'?`${CFG.tableau_specifique} – ${d.coffspec.trim().replace(/\s*\n+\s*/g,' ; ')}`:`${L.coffret} – ${d.coffret}${c?' ('+c.libelle+')':''}`;
+  B.push(['coffret',1,cf],['disj',1,`${L.disj} – ${d.disj}`]);
   if(d.c230==='oui')B.push(['c230',d.c230q||P.c230*n,L.c230]);
   const R=B.map(([k,q,nm])=>{const o=d.ov[k]||{};return{k,q:o.q??q,n:o.n??nm,mod:k in d.ov}});
   d.extras.forEach((x,i)=>R.push({k:'x'+i,q:x.qte,n:x.nom,ext:1}));
@@ -213,27 +313,29 @@ function rows(){
   return R;
 }
 function mail(){
-  let t=`${CFG.salutation}\n\nVoici la liste du matériel nécessaire pour le dossier ${d.dossier.trim().toUpperCase()}.\nPour une installation de ${d.kwc.trim()} KWC.\n\n`;
+  let t=`${bold(d.consuel)}\n\n${CFG.salutation}\n\nVoici la liste du matériel nécessaire pour le dossier ${d.dossier.trim().toUpperCase()}.\nPour une installation de ${d.kwc.trim()} KWC.\n\n`;
   rows().forEach(x=>{if(String(x.n).trim())t+=`● ${String(x.q).trim()||0} : ${String(x.n).trim()}\n`});
   if(d.notes.trim())t+=`\nNotes : ${d.notes.trim()}\n`;
   return t+`\n${CFG.signature}`;
 }
-function subj(){return CFG.objet.replace('{dossier}',d.dossier.trim().toUpperCase())}
+function subj(){return ST().objet.replace('{dossier}',d.dossier.trim().toUpperCase())}
 function recap(){
-  const ok=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(CFG.email||'');
+  const okM=valid(CFG.email),okF=okM&&valid(CFG.fournisseur.email);
   return `<h2>Récapitulatif</h2>
 <p class="hint">Corrige directement la liste. Une valeur modifiée passe en orange : le ↺ la rétablit au calcul d’origine.</p>
 <div class="row">${TITRES.map((t,i)=>`<button onclick="goto(${i})">${t}</button>`).join('')}</div>
 <div class="card">
+<p><b>${esc(d.consuel)}</b></p>
 <p>${esc(CFG.salutation)}</p>
 <p>Voici la liste du matériel nécessaire pour le dossier <b>${esc(d.dossier.trim().toUpperCase())}</b>.<br>Pour une installation de ${esc(d.kwc.trim())} KWC.</p>
 ${rows().map(r=>`<div class="ln${r.mod?' mod':''}"><span class="bu">●</span><input class="q" type="number" inputmode="numeric" min="0" value="${esc(r.q)}" oninput="ed('${r.k}','q',this.value,this)"><span class="sep">:</span><input class="nm" value="${esc(r.n)}" oninput="ed('${r.k}','n',this.value,this)">${r.ext?'':`<button class="rs" onclick="rst('${r.k}')">↺</button>`}</div>`).join('')}
 <div class="nts"><span>Notes :</span><textarea oninput="d.notes=this.value;save()" placeholder="facultatif">${esc(d.notes)}</textarea></div>
 <p>${esc(CFG.signature)}</p>
 </div>
-<button class="pri big" onclick="send()"${ok?'':' disabled'}>📧 Envoyer par mail</button>
+<button class="pri big" onclick="send(0)"${okM?'':' disabled'}>📧 Envoyer à moi uniquement</button>
+<button class="big" onclick="send(1)"${okF?'':' disabled'}>📧 Envoyer à moi et à ${esc(CFG.fournisseur.nom)}</button>
 <button class="big" onclick="copy()">📋 Copier le texte</button>
-${ok?'':'<p class="warn">Adresse de réception non configurée : renseigne « email » dans le bloc de configuration.</p>'}`;
+${okM?'':'<p class="warn">Adresse de réception non configurée : renseigne « email » dans le bloc de configuration.</p>'}`;
 }
 function ed(k,f,v,el){
   if(k[0]==='x'){const x=d.extras[+k.slice(1)];x[f==='q'?'qte':'nom']=v}
@@ -241,7 +343,7 @@ function ed(k,f,v,el){
   el.closest('.ln').classList.add('mod');save();
 }
 function rst(k){delete d.ov[k];save();render()}
-function send(){location.href='mailto:'+CFG.email+'?subject='+encodeURIComponent(subj())+'&body='+encodeURIComponent(mail())}
+function send(f){const to=f?CFG.email+','+CFG.fournisseur.email:CFG.email;location.href='mailto:'+to+'?subject='+encodeURIComponent(subj())+'&body='+encodeURIComponent(mail())}
 async function copy(){
   const t=mail();
   try{await navigator.clipboard.writeText(t);toast('Texte copié ✔')}
